@@ -1,14 +1,16 @@
 <template>
   <div id="app">
     <h1>app</h1>
+    <i class="toutiao toutiao-dianzan"></i>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 export default {
-  name: "app",
+  name: "App",
 };
 </script>
 
-<style>
+<style lang="less" scoped>
 </style>
