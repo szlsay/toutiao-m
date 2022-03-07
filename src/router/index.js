@@ -6,7 +6,7 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-      // name: 'layout', // 如果父路由有默认子路由，那它的 name 没有意义
+    // name: 'layout', // 如果父路由有默认子路由，那它的 name 没有意义
     component: () => import('@/views/layout'),
     children: [
       {
@@ -40,6 +40,12 @@ const routes = [
     path: '/search',
     name: 'search',
     component: () => import('@/views/search')
+  },
+  {
+    path: '/article/:articleId',
+    name: 'article',
+    component: () => import('@/views/article'),
+    props: true // 开启 Props 传参，说白了就是把路由参数映射到组件的 props 数据中
   },
 ]
 
