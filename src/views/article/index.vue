@@ -265,7 +265,6 @@ export default {
       for (let index = 0; index < imgs.length; index++) {
         const img = imgs[index];
         let src = img.src;
-        console.log(src);
         if (src.includes("https://images.weserv.nl/?url=")) {
           src = src.replace("https://images.weserv.nl/?url=", "");
           img.src = src;
