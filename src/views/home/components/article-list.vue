@@ -1,5 +1,5 @@
 <template>
-  <div class="article-list">
+  <div class="article-list" ref="scroll" @scroll="scrollFn">
     <!--
       List 列表组件：瀑布流滚动加载，用于展示长列表。
 
@@ -50,21 +50,21 @@
 </template>
 
 <script>
-import { getArticles } from '@/api/article'
-import ArticleItem from '@/components/article-item'
+import { getArticles } from "@/api/article";
+import ArticleItem from "@/components/article-item";
 
 export default {
-  name: 'ArticleList',
+  name: "ArticleList",
   components: {
-    ArticleItem
+    ArticleItem,
   },
   props: {
     channel: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  data () {
+  data() {
     return {
       list: [], // 存储列表数据的数组
       loading: false, // 控制加载中 loading 状态
@@ -72,16 +72,27 @@ export default {
       timestamp: null, // 请求获取下一页数据的时间戳
       error: false, // 控制列表加载失败的提示状态
       isreFreshLoading: false, // 控制下拉刷新的 loading 状态
-      refreshSuccessText: '刷新成功' // 下拉刷新成功提示文本
-    }
+      refreshSuccessText: "刷新成功", // 下拉刷新成功提示文本
+      scrollTop: 0,
+    };
   },
   computed: {},
   watch: {},
-  created () {},
-  mounted () {},
+  created() {},
+  mounted() {},
   methods: {
+    scrollFn() {
+      this.scrollTop = this.$refs.scroll.scrollTop;
+      console.log("滚动位置", this.scrollTop);
+    },
+    // 封装方便父组件在激活子组件时调用
+    scrollToTop () {
+      // 组件缓存并不会销毁数据，重新激活时还原滚动高度
+      this.$refs.scroll.scrollTop = this.scrollTop
+      console.log("scrollToTop", this.scrollTop);
+    },
     // 初始化或滚动到底部的时候会触发调用 onLoad
-    async onLoad () {
+    async onLoad() {
       try {
         // 1. 请求获取数据
         const { data } = await getArticles({
@@ -90,8 +101,8 @@ export default {
           // 如果请求第1页数据：当前最新时间戳 Date.now
           // 如果请求之后的数据，使用本次接口返回的数据中的 pre_timestamp
           timestamp: this.timestamp || Date.now(), // 时间戳，请求新的推荐数据传当前的时间戳，请求历史推荐传指定的时间戳
-          with_top: 1 // 是否包含置顶，进入页面第一次请求时要包含置顶文章，1-包含置顶，0-不包含
-        })
+          with_top: 1, // 是否包含置顶，进入页面第一次请求时要包含置顶文章，1-包含置顶，0-不包含
+        });
 
         // 模拟随机失败的情况
         // if (Math.random() > 0.5) {
@@ -99,39 +110,39 @@ export default {
         // }
 
         // 2. 把请求结果数据放到 list 数组中
-        const { results } = data.data
+        const { results } = data.data;
         // 数组的展开操作符，它会把数组元素一个一个拿出来
-        this.list.push(...results)
+        this.list.push(...results);
 
         // 3. 本次数据加载结束之后要把加载状态设置为结束
-        this.loading = false
+        this.loading = false;
 
         // 4. 判断数据是否全部加载完成
         if (results.length) {
           // 更新获取下一页数据的时间戳
-          this.timestamp = data.data.pre_timestamp
+          this.timestamp = data.data.pre_timestamp;
         } else {
           // 没有数据了，将 finished 设置为 true，不再 load 加载更多了
-          this.finished = true
+          this.finished = true;
         }
       } catch (err) {
         // 展示错误提示状态
-        this.error = true
+        this.error = true;
 
         // 请求失败了，loading 也需要关闭
-        this.loading = false
+        this.loading = false;
       }
     },
 
     // 当下拉刷新的时候会触发调用该函数
-    async onRefresh () {
+    async onRefresh() {
       try {
         // 1. 请求获取数据
         const { data } = await getArticles({
           channel_id: this.channel.id, // 频道ID
           timestamp: Date.now(), // 下拉刷线，每次请求获取最新数据，所以传递当前最新时间戳
-          with_top: 1 // 是否包含置顶，进入页面第一次请求时要包含置顶文章，1-包含置顶，0-不包含
-        })
+          with_top: 1, // 是否包含置顶，进入页面第一次请求时要包含置顶文章，1-包含置顶，0-不包含
+        });
 
         // 模拟随机失败的情况
         // if (Math.random() > 0.2) {
@@ -139,29 +150,38 @@ export default {
         // }
 
         // 2. 将数据追加到列表的顶部
-        const { results } = data.data
-        this.list.unshift(...results)
+        const { results } = data.data;
+        this.list.unshift(...results);
 
         // 3. 关闭下拉刷新的 loading 状态
-        this.isreFreshLoading = false
+        this.isreFreshLoading = false;
 
         // 更新下拉刷新成功提示的文本
-        this.refreshSuccessText = `刷新成功，更新了${results.length}条数据`
+        this.refreshSuccessText = `刷新成功，更新了${results.length}条数据`;
       } catch (err) {
-        this.refreshSuccessText = '刷新失败'
-        this.isreFreshLoading = false
+        this.refreshSuccessText = "刷新失败";
+        this.isreFreshLoading = false;
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped lang="less">
+// .article-list {
+//   position: fixed;
+//   top: 180px;
+//   bottom: 100px;
+//   overflow-y: auto;
+//   right: 0;
+//   left: 0;
+// }
+
 .article-list {
   position: fixed;
   top: 180px;
   bottom: 100px;
-  overflow-y: auto;
+  overflow: auto;
   right: 0;
   left: 0;
 }

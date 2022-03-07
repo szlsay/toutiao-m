@@ -12,7 +12,10 @@ const routes = [
       {
         path: '', // 默认子路由
         name: 'home',
-        component: () => import('@/views/home')
+        component: () => import('@/views/home'),
+        meta: {
+          isKeepAlive: true // 是否缓存
+        }
       },
       {
         path: 'qa',

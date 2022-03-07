@@ -28,7 +28,7 @@
         :key="channel.id"
       >
         <!-- 文章列表 -->
-        <article-list ref="article-list" :channel="channel" />
+        <article-list ref="list" :channel="channel" />
         <!-- 文章列表 -->
       </van-tab>
       <div slot="nav-right" class="placeholder"></div>
@@ -84,7 +84,15 @@ export default {
   computed: {
     ...mapState(["user"]),
   },
-  watch: {},
+  watch: {
+    async active() {
+      // active发送变化，等待dom更新后再执行函数，以获取全部渲染过的list
+      await this.$nextTick();
+      this.$refs.list.forEach((item) => {
+        item.scrollToTop();
+      });
+    },
+  },
   created() {
     this.loadChannels();
   },

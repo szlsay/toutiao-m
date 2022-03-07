@@ -1,8 +1,13 @@
 <template>
   <div id="app">
-    <keep-alive exclude="ArticleIndex">
+    <!-- <keep-alive exclude="ArticleIndex">
       <router-view></router-view>
+    </keep-alive> -->
+    <!-- 按需缓存 -->
+    <keep-alive>
+      <router-view v-if="$route.meta.isKeepAlive" />
     </keep-alive>
+    <router-view v-if="!$route.meta.isKeepAlive" />
   </div>
 </template>
 
